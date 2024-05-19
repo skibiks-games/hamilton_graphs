@@ -1,7 +1,12 @@
 import random
 from collections import deque
 import random
+from time import time
 
+from matplotlib import pyplot as plt
+import sys
+
+sys.setrecursionlimit(100000)
 
 def print_matrix(matrix):
     print("Graf jako macierz sąsiedztwa:")
@@ -110,7 +115,7 @@ def dfs_euler(v, matrix, n, queue):
 def search_euler(matrix, n):
     queue = deque()
     dfs_euler(0, matrix, n, queue)
-    print("Ścieżka Eulera:", list(queue))
+    return list(queue)
 
 
 def hamiltonian(v, matrix):
@@ -141,19 +146,106 @@ def h_cycle(matrix):
     k = 1
     return hamiltonian(start, matrix)
 
+# answer = 1
+# while answer != 0:
+#     print("Wybierz opcje:\n"
+#           "1 wygeneruj graf hamiltonowski\n"
+#           "2 wygeneruj graf nie-hamiltonowski\n"
+#           "3 znajdz cykl Eulera i Hamiltona\n"
+#           "0 zakoncz program")
+#     answer = int(input())
+#     if answer == 1:
+#         n = int(input("n = "))
+#         s = float(input("s = ")) #hamilton 0.3 0.7 no-hamilton 0.5
+#         matrix = generate_hamiltonian_graph(n, s)
+#         print_matrix(matrix)
+#     elif answer == 2:
+#         n = int(input("n = "))
+#         matrix = generate_non_hamiltonian_graph(n)
+#         print_matrix(matrix)
+#     elif answer == 3:
+#         O = [False for _ in range(len(matrix))]
+#         start = len(matrix) - 1
+#         visited = 0
+#         k = len(matrix) - 1
+#         Path = [0 for _ in range(len(matrix))]
+#         current_path = []
+#
+#         print_matrix(matrix)
+#         h_cycle(matrix)
+#         print(f"Cykl Hamiltona: {Path}")
+#         print("Ścieżka Eulera:", search_euler(matrix, n))
 
-matrix_hamilton = generate_hamiltonian_graph(10, 0.7)
-matrix_non_hamilton = generate_non_hamiltonian_graph(10)
+xVal = [10, 30, 50, 70, 90, 110, 130, 150, 170, 190]
+yVal1 = [0 for _ in range(len(xVal))]
+yVal2 = [0 for _ in range(len(xVal))]
 
-O = [False for _ in range(len(matrix_hamilton))]
-start = len(matrix_hamilton) - 1
-visited = 0
-k = len(matrix_hamilton) - 1
-Path = [0 for _ in range(len(matrix_hamilton))]
-current_path = []
+for i in range(len(xVal)):
+    matrix = generate_hamiltonian_graph(xVal[i], 0.3)
+    timer = time()
+    search_euler(matrix, xVal[i])
+    yVal1[i] = time() - timer
 
+    matrix = generate_hamiltonian_graph(xVal[i], 0.7)
+    timer = time()
+    search_euler(matrix, xVal[i])
+    yVal2[i] = time() - timer
+plt.plot(xVal, yVal1, label="dla nasycenia 30%")
+plt.plot(xVal, yVal2, label="dla nasycenia 70%")
+plt.legend()
+plt.title("graf hamiltonowski - znajdowanie cyklu Eulera")
+plt.xlabel("n")
+plt.ylabel("czas (s)")
+plt.show()
 
-print_matrix(matrix_hamilton)
-h_cycle(matrix_hamilton)
-print(f"Cykl Hamiltona: {Path}")
-search_euler(matrix_hamilton, 10)
+for i in range(len(xVal)):
+    matrix = generate_hamiltonian_graph(xVal[i], 0.3)
+    timer = time()
+    O = [False for _ in range(len(matrix))]
+    start = len(matrix) - 1
+    visited = 0
+    k = len(matrix) - 1
+    Path = [0 for _ in range(len(matrix))]
+    current_path = []
+    h_cycle(matrix)
+    yVal1[i] = time() - timer
+
+    matrix = generate_hamiltonian_graph(xVal[i], 0.7)
+    timer = time()
+    O = [False for _ in range(len(matrix))]
+    start = len(matrix) - 1
+    visited = 0
+    k = len(matrix) - 1
+    Path = [0 for _ in range(len(matrix))]
+    current_path = []
+    h_cycle(matrix)
+    yVal2[i] = time() - timer
+
+plt.plot(xVal, yVal1, label="dla nasycenia 30%")
+plt.plot(xVal, yVal2, label="dla nasycenia 70%")
+plt.legend()
+plt.title("graf hamiltonowski - znajdowanie cyklu Hamiltona")
+plt.xlabel("n")
+plt.ylabel("czas (s)")
+plt.show()
+
+xVal = [10, 15, 20, 25, 30]
+yVal1 = [0 for _ in range(len(xVal))]
+for i in range(len(xVal)):
+    matrix = generate_non_hamiltonian_graph(xVal[i])
+    timer = time()
+    O = [False for _ in range(len(matrix))]
+    start = len(matrix) - 1
+    visited = 0
+    k = len(matrix) - 1
+    Path = [0 for _ in range(len(matrix))]
+    current_path = []
+    h_cycle(matrix)
+    yVal1[i] = time() - timer
+
+plt.plot(xVal, yVal1, label="dla nasycenia 50%")
+plt.legend()
+plt.title("graf nie hamiltonowski - znajdowanie cyklu Hamiltona")
+plt.xlabel("n")
+plt.ylabel("czas (s)")
+plt.show()
